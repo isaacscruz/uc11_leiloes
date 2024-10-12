@@ -83,8 +83,57 @@ public class ProdutosDAO {
 }
 
 
-    void venderProduto(int produtoId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+  public void venderProduto(int produtoId) {
+    String sql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?"; // SQL para atualizar o status
+    try {
+        conn = new conectaDAO().connectDB(); // Conecta ao banco
+        prep = conn.prepareStatement(sql);
+        prep.setInt(1, produtoId); // Define o ID do produto
+
+        prep.executeUpdate(); // Executa a atualização
+        JOptionPane.showMessageDialog(null, "Produto vendido com sucesso.");
+    } catch (SQLException e) {
+        System.out.println("Erro ao vender produto: " + e.getMessage());
+    } finally {
+        try {
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            System.out.println("Erro ao fechar a conexão: " + e.getMessage());
+        }
     }
 }
-   
+
+public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+    ArrayList<ProdutosDTO> listaVendidos = new ArrayList<>();
+    String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
+    
+    try {
+        conn = new conectaDAO().connectDB();
+        prep = conn.prepareStatement(sql);
+        rs = prep.executeQuery();
+        
+        while (rs.next()) {
+            ProdutosDTO produto = new ProdutosDTO();
+            produto.setId(rs.getInt("id"));
+            produto.setNome(rs.getString("nome"));
+            produto.setValor(rs.getInt("valor"));
+            produto.setStatus(rs.getString("status"));
+            
+            listaVendidos.add(produto);
+        }
+    } catch (SQLException e) {
+        System.out.println("Erro ao listar produtos vendidos: " + e.getMessage());
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            System.out.println("Erro ao fechar a conexão: " + e.getMessage());
+        }
+    }
+    
+    return listaVendidos;
+}
+}
